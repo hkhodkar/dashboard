@@ -1,23 +1,46 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { IoEyeSharp, IoEyeOff } from "react-icons/io5";
 import { FaGoogle, FaFacebookF } from "react-icons/fa";
+import { ChangeEvent, FormEvent, useState } from "react";
 import { Input, Checkbox, Button } from "@hatef_khodkar/storybook";
 
+import { InputType } from "./input.type";
 import ThemeSwitcher from "../theme/ThemeSwitcher";
 
-export enum InputType {
-  text = "text",
-  password = "password",
-}
-
 function Register() {
-  const [inputType, setInputType] = useState(InputType.password);
+  const [passwordInputType, setPasswordInputType] = useState(
+    InputType.password
+  );
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [registerState, setRegisterState] = useState({
+    username: "",
+    password: "",
+    email: "",
+  });
 
   function handleShowPassword(): void {
-    setInputType((type) =>
+    setPasswordInputType((type) =>
       type === InputType.text ? InputType.password : InputType.text
     );
+  }
+
+  function registerStateHandler(event: ChangeEvent<HTMLInputElement>) {
+    console.log(event.target.name);
+    setRegisterState((state) => {
+      return {
+        ...state,
+        [event.target.name]: event.target.value,
+      };
+    });
+  }
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>): void {
+    event.preventDefault();
+    console.log(registerState);
+  }
+
+  function handleAcceptTerms() {
+    setAcceptTerms((checked) => !checked);
   }
 
   return (
@@ -29,15 +52,34 @@ function Register() {
           </div>
           <h2 className="text-xl mb- text-center font-bold">Register</h2>
           <br />
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-12  mb-3">
-              <Input label="Username" id="Username" variant="primary" />
-              <Input label="Email" id="Email" variant="primary" />
               <Input
-                type={inputType}
+                required
+                label="Username"
+                id="Username"
+                name="username"
+                onChange={registerStateHandler}
+                value={registerState.username}
+              />
+              <Input
+                required
+                type="email"
+                label="Email"
+                id="Email"
+                name="email"
+                onChange={registerStateHandler}
+                value={registerState.email}
+              />
+              <Input
+                required
+                type={passwordInputType}
+                onChange={registerStateHandler}
+                name="password"
                 hasSuffix
+                value={registerState.password}
                 inputSuffix={
-                  inputType === InputType.text ? (
+                  passwordInputType === InputType.text ? (
                     <IoEyeOff
                       className="cursor-pointer"
                       onClick={handleShowPassword}
@@ -51,13 +93,16 @@ function Register() {
                 }
                 label="Password"
                 id="Password"
-                variant="primary"
               />
               <Checkbox
+                checked={acceptTerms}
+                onChange={handleAcceptTerms}
+                required
                 label="I agree to privacy policy & terms"
-                variant="primary"
               />
-              <Button variant="accent">Sign Up</Button>
+              <Button isDisabled={!acceptTerms} variant="accent" type="submit">
+                Sign Up
+              </Button>
             </div>
 
             <div>
